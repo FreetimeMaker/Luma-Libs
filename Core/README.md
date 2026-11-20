@@ -1,16 +1,16 @@
 # Freetime Core module
 
-Small, dependency-light base module shared by the other Freetime Core libraries.
+Small, dependency-light base module for Luma Store developers.
 
 ## Dependency
 
-Version **4.0.1** is staged locally; this dependency becomes available once the release is published and anonymously verified.
+Use version **1.0.0** once it is published.
 
 ```kotlin
-implementation("com.freetime:Core:4.0.1")
+implementation("com.freetime:Core:1.0.0")
 ```
 
-Add `https://repo.free-time.me/maven/` to your repositories. See the root [installation and JitPack migration guide](../README.md#installation) for repository setup and access requirements. Anonymous access and complete KMP metadata must be verified before release. See the [publishing requirements](../README.md#publishing); the historical AAR-only public uploader is not suitable for KMP.
+Add `https://repo.free-time.me/maven/` to your repositories. See the root [installation guide](../README.md#installation) for repository setup and access requirements. Anonymous access and complete KMP metadata must be verified before release. See the [publishing requirements](../README.md#publishing); the historical AAR-only public uploader is not suitable for KMP.
 
 ## What it provides
 
@@ -30,7 +30,7 @@ val app = FreetimeAppInfo(
 )
 ```
 
-The module intentionally stays small. It does not require Luma Store, authentication, Compose, Material 3 or a Freetime backend. UI belongs in the separate `Design` module.
+The module intentionally stays small. It does not require Luma Store, authentication, Compose, Material 3 or a Freetime backend. UI and theming belong to the host app.
 
 ## Multiplatform
 

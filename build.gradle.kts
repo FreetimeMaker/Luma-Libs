@@ -7,7 +7,6 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 plugins {
     alias(libs.plugins.android.multiplatform.library) apply false
-    alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.compose.multiplatform) apply false
     alias(libs.plugins.compose.compiler) apply false
@@ -15,8 +14,8 @@ plugins {
 
 val releaseVersion = providers.gradleProperty("releaseVersion")
     .orElse(providers.environmentVariable("VERSION"))
-    .orElse(libs.versions.freetime)
-val libraryModules = listOf("Core", "Design", "Browser", "Donations", "FreetimeWarn", "Notifications")
+    .orElse(libs.versions.luma)
+val libraryModules = listOf("Core", "Donations", "Store", "Updater")
 
 allprojects {
     group = "com.freetime"
@@ -62,9 +61,9 @@ subprojects {
                 }
                 publications.withType<MavenPublication>().configureEach {
                     pom {
-                        name.set("Freetime Core - ${project.name}")
+                        name.set("Luma Libs - ${project.name}")
                         description.set("Reusable Android and desktop Kotlin Multiplatform ${project.name} module.")
-                        url.set("https://github.com/FreetimeMaker/Freetime-Core")
+                        url.set("https://github.com/FreetimeMaker/Luma-Libs")
                         licenses {
                             license {
                                 name.set("GNU General Public License v3.0")
@@ -80,8 +79,8 @@ subprojects {
                             }
                         }
                         scm {
-                            connection.set("scm:git:https://github.com/FreetimeMaker/Freetime-Core.git")
-                            url.set("https://github.com/FreetimeMaker/Freetime-Core")
+                            connection.set("scm:git:https://github.com/FreetimeMaker/Luma-Libs.git")
+                            url.set("https://github.com/FreetimeMaker/Luma-Libs")
                         }
                     }
                 }

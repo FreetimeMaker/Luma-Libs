@@ -16,6 +16,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Freetime Core KMP"
-include(":Core", ":Design", ":Browser", ":Donations", ":FreetimeWarn", ":Notifications", ":Sample", ":Sample-android")
-project(":Sample-android").projectDir = file("Sample/androidApp")
+rootProject.name = "Luma Libraries"
+include(":Core", ":Donations", ":Store", ":Updater")

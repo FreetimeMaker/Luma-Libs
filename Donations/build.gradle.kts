@@ -16,12 +16,10 @@ kotlin {
     jvmToolchain(17)
     sourceSets {
         commonMain.dependencies {
-            api(project(":Core"))
-            api(project(":Browser"))
-            implementation(compose.runtime)
-            implementation(compose.ui)
+            api(compose.runtime)
+            api(compose.ui)
             implementation(compose.foundation)
-            implementation(project(":Design"))
+            implementation(libs.compose.material3)
         }
         commonTest.dependencies { implementation(kotlin("test")) }
     }
