@@ -1,0 +1,93 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(sed -n 's/^freetime = "\([^"]*\)"/\1/p' gradle/libs.versions.toml | head -n1)"
+          if [[ -z "$VERSION" ]]; then
+            echo "Missing [versions].freetime in gradle/libs.versions.toml"
+            exit 1
+          fi
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid Freetime Core version: $VERSION"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Test publishing scripts
+        run: python3 -m unittest discover -s .github/scripts -p 'test_*.py'
+
+      - name: Build and test libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew :Design:checkTemplates :Core:testAndroidHostTest :Browser:testAndroidHostTest :Donations:testAndroidHostTest :FreetimeWarn:testAndroidHostTest :Notifications:testAndroidHostTest :Sample-android:assembleDebug :Sample-android:assembleRelease stagePublications
+          ./gradlew -Djava.awt.headless=true :Core:desktopTest :Design:desktopTest :Browser:desktopTest :Donations:desktopTest :FreetimeWarn:desktopTest :Notifications:desktopTest :Sample:compileKotlinDesktop
+
+      - name: Validate staged unified publications
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/verify_gemfury_release.py "${{ steps.version.outputs.version }}" --staging build/public-maven --local-only
+
+  tag:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+      - name: Create version tag if absent
+        shell: bash
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          set -euo pipefail
+          TAG="v$VERSION"
+          REF="refs/tags/$TAG"
+          if git ls-remote --exit-code --refs origin "$REF"; then
+            echo "$TAG already exists; leaving it unchanged."
+            exit 0
+          else
+            STATUS=$?
+            if [[ "$STATUS" != 2 ]]; then
+              exit "$STATUS"
+            fi
+          fi
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              tag -a "$TAG" "$GITHUB_SHA" -m "Freetime Core $VERSION"
+          git push origin "$REF:$REF"
